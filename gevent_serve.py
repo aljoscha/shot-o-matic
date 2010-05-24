@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #
-# Adapted from the tornade0.2 example directory
 
 # virtual env stuff
 import os
