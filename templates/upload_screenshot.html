@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Upload screenshot<h1>
+  <form action="{{ url_for('upload_screenshot') }}" method="post" enctype="multipart/form-data" class=add-user>
+      <input type="file" name="screenshot" >
+      <br>
+      <input type="submit" value="Upload" >
+  </form>
+{% endblock %}

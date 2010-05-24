@@ -1,0 +1,8 @@
+body { font-family: "Droid Serif"; }
+a, h1, h2       { color: #377BA8; }
+
+.screenshot img { width: 100%; }
+
+.nav {
+    font-size: 150%;
+}

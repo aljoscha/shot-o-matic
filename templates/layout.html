@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>shot-O-matic</title>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='screen.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="span-24 append-bottom prepend-top nav">
+        <a href="{{ url_for('show_screenshots') }}">shots</a> //
+        <a href="{{ url_for('show_screenshots', all=1) }}">shots (all)</a> //
+    {% if not session.logged_in %}
+        <a href="{{ url_for('login') }}">log in</a>
+    {% else %}
+        <a href="{{ url_for('upload_screenshot') }}">upload</a> //
+        <a href="{{ url_for('show_users') }}">users</a> //
+        <a href="{{ url_for('logout') }}">log out</a>
+    {% endif %}
+    </div>
+    {% if get_flashed_messages() %}
+    <div class="span-24">
+    {% for message in get_flashed_messages() %}
+        <div class="notice">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="span-24 content">
+    {% block body %}{% endblock %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Users</h1>
+  <ul>
+  {% for user in users %}
+  <li>{{ user.id }}: {{ user.name }} <a href="{{ url_for('delete_user', id=user.id) }}">delete</a></li>
+  {% else %}
+    <li><em>How could you login?! No users exist.</em>
+  {% endfor %}
+  </ul>
+  <hr>
+  <h1>Add user</h1>
+  <form action="{{ url_for('add_user') }}" method=post class=add-user>
+      <table>
+          <tr>
+              <td width="60"><label for="name">Name</label></td>
+              <td><input type="text" size=30 name="name"></td>
+          </tr>
+          <tr>
+              <td><label for="password">Password</label></td>
+              <td><input type="password" size=30 name="password"></td>
+          </tr>
+      </table>
+      <input type="submit" value="Add">
+  </form>
+{% endblock %}

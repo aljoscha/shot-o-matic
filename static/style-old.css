@@ -1,0 +1,20 @@
+body            { font-family: 'Droid Serif', sans-serif; background: #fff; }
+a, h1, h2       { color: #377BA8; }
+h1, h2          { font-family: 'Molengo', arial, serif; margin: 0; }
+h1              { border-bottom: 2px solid #eee; }
+h2              { font-size: 1.2em; }
+
+.screenshot img { width: 100%; }
+
+.controls        { list-style: none; padding: 0px; margin: 0px; margin-top: -5px; }
+.controls li { display: inline; }
+
+.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em; margin: 0px;
+                  background: #ddd; }
+.metanav li { background-color: #eee; padding: 1px; margin: 1px; display: inline; }
+.metanav li:hover { background-color: #ddd; padding: 1px; margin: 1px; display: inline; }
+.metanav a { text-decoration: none; }
+
+.flash          { background: #CEE5F5; padding: 0.5em;
+                  border: 1px solid #AACBE2; margin-bottom:3px; }
+.error          { background: #F0D6D6; padding: 0.5em; }
