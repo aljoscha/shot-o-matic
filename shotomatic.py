@@ -68,6 +68,16 @@ def admin_required(message="Admin status required to acccess this section."):
         return decorated_function
     return decorator
 
+def login_required(message="You must be logged in to access this section."):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if g.user is None:
+                flash(message)
+                return redirect(url_for('login', next=request.url))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 ################################################################################
 # Per request stuff
@@ -119,24 +129,8 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST', 'GET'])
+@login_required("You need to be logged in in order to upload screenshots.")
 def upload_screenshot():
-    valid_credentials = False
-    if g.user is None:
-        # Allow upload if the username and password are sent with the request
-        # this is only for upload via the client uploader program
-        if (request.form.get('username', False) and
-                request.form.get('password', False)):
-            user = query_db('select * from users where name = ?',
-                            [request.form['username']],
-                            one=True)
-            if user and check_password_hash(user['password'],
-                                            request.form['password']):
-                valid_credentials = True
-    else:
-        valid_credentials = True
-    if not valid_credentials:
-        flash('You need to be logged in in order to upload screenshots.')
-        return redirect(url_for('show_screenshots'))
     if request.method == 'POST':
         file = request.files['screenshot']
         if file and allowed_file(file.filename):
@@ -149,10 +143,8 @@ def upload_screenshot():
     return render_template('upload_screenshot.html')
 
 @app.route('/delete/<shot>')
+@login_required("You need to be logged in in order to delete screenshots.")
 def delete_screenshot(shot):
-    if g.user is None:
-        flash('You need to be logged in in order to delete screenshots.')
-        return redirect(url_for('show_screenshots'))
     filename = os.path.join(config.SCREENSHOTS_DIR, shot)
     if not os.path.exists(filename):
         flash("Screenshot '{0}' does not exist".format(filename))
@@ -162,19 +154,16 @@ def delete_screenshot(shot):
     return redirect(url_for('show_screenshots'))
 
 @app.route('/users')
+@login_required()
 @admin_required()
 def show_users():
-    if g.user is None:
-        flash('You need to be logged in for administrative functions.')
-        return redirect(url_for('show_screenshots'))
     users = query_db('select * from users')
     return render_template('show_users.html', users=users) 
 
 @app.route('/users/add', methods=['POST'])
+@login_required()
+@admin_required()
 def add_user():
-    if g.user is None:
-        flash('You need to be logged in for administrative functions.')
-        return redirect(url_for('show_screenshots'))
     query_db('insert into users values (NULL, ?, ?, ?)',
              [request.form['name'],
               generate_password_hash(request.form['password']),
@@ -184,10 +173,9 @@ def add_user():
     return redirect(url_for('show_users'))
 
 @app.route('/users/delete/<int:id>', methods=['POST', 'GET'])
+@login_required()
+@admin_required()
 def delete_user(id):
-    if g.user is None:
-        flash('You need to be logged in for administrative functions.')
-        return redirect(url_for('show_screenshots'))
     user = query_db('select * from users where id=?', [id])
     if len(user) <= 0:
         flash('User does not exist')
@@ -205,21 +193,23 @@ def login():
                         [request.form['username']],
                         one=True)
         if user is None:
-            error = 'Invalid username'
+            error = 'Invalid username.'
         elif not check_password_hash(user['password'],request.form['password']):
-            error = 'Invalid password'
+            error = 'Invalid password.'
         else:
             session['user_id'] = user['id']
             session.permanent = True
-            flash('You were logged in')
-            return redirect(url_for('show_screenshots'))
+            flash('You were logged in.')
+            if 'next' in request.args:
+                return redirect(request.args['next'])
+            else:
+                return redirect(url_for('show_screenshots'))
     return render_template('login.html', error=error)
-
 
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
-    flash('You were logged out')
+    flash('You were logged out.')
     return redirect(url_for('show_screenshots'))
 
 if __name__ == '__main__':
