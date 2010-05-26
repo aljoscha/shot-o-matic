@@ -73,6 +73,15 @@ def login_required(message="You must be logged in to access this section."):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if g.user is None:
+                # allow for direct file upload with client
+                if (request.form.get('username', False) and
+                        request.form.get('password', False)):
+                    user = query_db('select * from users where name = ?',
+                                    [request.form['username']],
+                                    one=True)
+                    if user and check_password_hash(user['password'],
+                                                    request.form['password']):
+                        return f(*args, **kwargs)
                 flash(message)
                 return redirect(url_for('login', next=request.url))
             return f(*args, **kwargs)
