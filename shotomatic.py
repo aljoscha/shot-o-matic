@@ -125,10 +125,9 @@ def show_screenshots():
 
 @app.route('/shot/<shot>')
 def screenshot(shot):
-    shot = secure_filename(shot)
-    filename = os.path.join(config.SCREENSHOTS_DIR, shot)
+    filename = os.path.join(config.SCREENSHOTS_DIR, secure_filename(shot))
     if not os.path.exists(filename):
-        flash("Screenshot '{0}' does not exist".format(filename), 'error')
+        flash("Screenshot '{0}' does not exist".format(shot), 'error')
         return redirect(url_for('show_screenshots'))
     
     return send_file(filename)
@@ -156,7 +155,7 @@ def upload_screenshot():
 def delete_screenshot(shot):
     filename = os.path.join(config.SCREENSHOTS_DIR, secure_filename(shot))
     if not os.path.exists(filename):
-        flash("Screenshot '{0}' does not exist.".format(filename), 'error')
+        flash("Screenshot '{0}' does not exist.".format(shot), 'error')
         return redirect(url_for('show_screenshots'))
     os.remove(filename)
     flash('Screenshot removed.', 'success')
