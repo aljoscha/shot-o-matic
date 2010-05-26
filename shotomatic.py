@@ -154,12 +154,12 @@ def upload_screenshot():
 @app.route('/delete/<shot>')
 @login_required("You need to be logged in in order to delete screenshots.")
 def delete_screenshot(shot):
-    filename = os.path.join(config.SCREENSHOTS_DIR, shot)
+    filename = os.path.join(config.SCREENSHOTS_DIR, secure_filename(shot))
     if not os.path.exists(filename):
-        flash("Screenshot '{0}' does not exist".format(filename))
+        flash("Screenshot '{0}' does not exist.".format(filename))
         return redirect(url_for('show_screenshots'))
     os.remove(filename)
-    flash('Screenshot removed')
+    flash('Screenshot removed.')
     return redirect(url_for('show_screenshots'))
 
 @app.route('/users')
