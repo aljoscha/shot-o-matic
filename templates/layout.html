@@ -15,7 +15,7 @@
     {% if g.user %}
         <a href="{{ url_for('upload_screenshot') }}">upload</a> //
         <a href="{{ url_for('show_users') }}">users</a> //
-        <a href="{{ url_for('logout') }}">log out</a>
+        <a href="{{ url_for('logout') }}">log out ({{ g.user.name }})</a>
     {% else %}
         <a href="{{ url_for('login') }}">log in</a>
     {% endif %}
