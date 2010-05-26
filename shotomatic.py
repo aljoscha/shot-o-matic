@@ -55,6 +55,22 @@ def init_db():
                     True])
         db.commit()
 
+################################################################################
+# Decorators
+def admin_required(message="Admin status required to acccess this section."):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if g.user is None or not g.user['admin']:
+                flash(message)
+                return redirect(url_for('show_screenshots'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+################################################################################
+# Per request stuff
 @app.before_request
 def before_request():
     """Make sure we are connected to the database each request."""
@@ -75,7 +91,8 @@ def after_request(response):
     g.db.close()
     return response
 
-
+################################################################################
+# Views
 @app.route('/')
 def show_screenshots():
     screenshots = glob.glob(config.SCREENSHOTS_DIR + '/*')
@@ -145,6 +162,7 @@ def delete_screenshot(shot):
     return redirect(url_for('show_screenshots'))
 
 @app.route('/users')
+@admin_required()
 def show_users():
     if g.user is None:
         flash('You need to be logged in for administrative functions.')
