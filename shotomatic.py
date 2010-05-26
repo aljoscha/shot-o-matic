@@ -11,11 +11,12 @@
 """
 from __future__ import with_statement
 
-import os.path
 import os
 import glob
 import sqlite3
 from contextlib import closing
+# for our decorators
+from functools import wraps 
 
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash, send_file
@@ -25,12 +26,13 @@ from werkzeug import generate_password_hash, check_password_hash
 
 # configuration
 import config
-# create our little application :)
+
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 app.debug = config.DEBUG
 
-
+################################################################################
+# DB stuff
 def connect_db():
     """Returns a new connection to the database."""
     return sqlite3.connect(config.DATABASE)
@@ -57,7 +59,15 @@ def init_db():
 def before_request():
     """Make sure we are connected to the database each request."""
     g.db = connect_db()
-
+    if 'user_id' in session:
+        user_id = session.get('user_id')
+        user = query_db('select * from users where id = ?', [user_id], one=True)
+        if user:
+            g.user = user
+        else:
+            g.user = None
+    else:
+        g.user = None
 
 @app.after_request
 def after_request(response):
@@ -94,13 +104,16 @@ def allowed_file(filename):
 @app.route('/upload', methods=['POST', 'GET'])
 def upload_screenshot():
     valid_credentials = False
-    if not session.get('logged_in'):
+    if g.user is None:
+        # Allow upload if the username and password are sent with the request
+        # this is only for upload via the client uploader program
         if (request.form.get('username', False) and
                 request.form.get('password', False)):
             user = query_db('select * from users where name = ?',
                             [request.form['username']],
                             one=True)
-            if user and request.form['password'] == user['password']:
+            if user and check_password_hash(user['password'],
+                                            request.form['password']):
                 valid_credentials = True
     else:
         valid_credentials = True
@@ -120,7 +133,7 @@ def upload_screenshot():
 
 @app.route('/delete/<shot>')
 def delete_screenshot(shot):
-    if not session.get('logged_in'):
+    if g.user is None:
         flash('You need to be logged in in order to delete screenshots.')
         return redirect(url_for('show_screenshots'))
     filename = os.path.join(config.SCREENSHOTS_DIR, shot)
@@ -133,7 +146,7 @@ def delete_screenshot(shot):
 
 @app.route('/users')
 def show_users():
-    if not session.get('logged_in'):
+    if g.user is None:
         flash('You need to be logged in for administrative functions.')
         return redirect(url_for('show_screenshots'))
     users = query_db('select * from users')
@@ -141,7 +154,7 @@ def show_users():
 
 @app.route('/users/add', methods=['POST'])
 def add_user():
-    if not session.get('logged_in'):
+    if g.user is None:
         flash('You need to be logged in for administrative functions.')
         return redirect(url_for('show_screenshots'))
     query_db('insert into users values (NULL, ?, ?, ?)',
@@ -154,7 +167,7 @@ def add_user():
 
 @app.route('/users/delete/<int:id>', methods=['POST', 'GET'])
 def delete_user(id):
-    if not session.get('logged_in'):
+    if g.user is None:
         flash('You need to be logged in for administrative functions.')
         return redirect(url_for('show_screenshots'))
     user = query_db('select * from users where id=?', [id])
@@ -178,7 +191,7 @@ def login():
         elif not check_password_hash(user['password'],request.form['password']):
             error = 'Invalid password'
         else:
-            session['logged_in'] = True
+            session['user_id'] = user['id']
             session.permanent = True
             flash('You were logged in')
             return redirect(url_for('show_screenshots'))
@@ -187,7 +200,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
+    session.pop('user_id', None)
     flash('You were logged out')
     return redirect(url_for('show_screenshots'))
 
