@@ -21,6 +21,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash, send_file
 from werkzeug import SharedDataMiddleware
 from werkzeug import secure_filename
+from werkzeug import generate_password_hash, check_password_hash
 
 # configuration
 import config
@@ -46,8 +47,10 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql') as f:
             db.cursor().executescript(f.read())
-        db.execute('insert into users VALUES(NULL, ?, ?)',
-                   [config.DEFAULT_USERNAME, config.DEFAULT_PASSWORD])
+        db.execute('insert into users VALUES(NULL, ?, ?, ?)',
+                   [config.DEFAULT_USERNAME,
+                    generate_password_hash(config.DEFAULT_PASSWORD),
+                    True])
         db.commit()
 
 @app.before_request
@@ -141,8 +144,10 @@ def add_user():
     if not session.get('logged_in'):
         flash('You need to be logged in for administrative functions.')
         return redirect(url_for('show_screenshots'))
-    query_db('insert into users values (NULL, ?, ?)',
-             [request.form['name'], request.form['password']])
+    query_db('insert into users values (NULL, ?, ?, ?)',
+             [request.form['name'],
+              generate_password_hash(request.form['password']),
+              False])
     g.db.commit()
     flash('User added')
     return redirect(url_for('show_users'))
@@ -170,7 +175,7 @@ def login():
                         one=True)
         if user is None:
             error = 'Invalid username'
-        elif request.form['password'] != user['password']:
+        elif not check_password_hash(user['password'],request.form['password']):
             error = 'Invalid password'
         else:
             session['logged_in'] = True
