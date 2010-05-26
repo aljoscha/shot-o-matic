@@ -12,12 +12,12 @@
     <div class="span-24 append-bottom prepend-top nav">
         <a href="{{ url_for('show_screenshots') }}">shots</a> //
         <a href="{{ url_for('show_screenshots', all=1) }}">shots (all)</a> //
-    {% if not session.logged_in %}
-        <a href="{{ url_for('login') }}">log in</a>
-    {% else %}
+    {% if g.user %}
         <a href="{{ url_for('upload_screenshot') }}">upload</a> //
         <a href="{{ url_for('show_users') }}">users</a> //
         <a href="{{ url_for('logout') }}">log out</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">log in</a>
     {% endif %}
     </div>
     {% if get_flashed_messages() %}
