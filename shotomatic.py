@@ -62,7 +62,7 @@ def admin_required(message="Admin status required to acccess this section."):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if g.user is None or not g.user['admin']:
-                flash(message)
+                flash(message, 'error')
                 return redirect(url_for('show_screenshots'))
             return f(*args, **kwargs)
         return decorated_function
@@ -82,7 +82,7 @@ def login_required(message="You must be logged in to access this section."):
                     if user and check_password_hash(user['password'],
                                                     request.form['password']):
                         return f(*args, **kwargs)
-                flash(message)
+                flash(message, 'notice')
                 return redirect(url_for('login', next=request.url))
             return f(*args, **kwargs)
         return decorated_function
@@ -128,7 +128,7 @@ def screenshot(shot):
     shot = secure_filename(shot)
     filename = os.path.join(config.SCREENSHOTS_DIR, shot)
     if not os.path.exists(filename):
-        flash("Screenshot '{0}' does not exist".format(filename))
+        flash("Screenshot '{0}' does not exist".format(filename), 'error')
         return redirect(url_for('show_screenshots'))
     
     return send_file(filename)
@@ -145,10 +145,10 @@ def upload_screenshot():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(config.SCREENSHOTS_DIR, filename))
-            flash('Screenshot uploaded.')
+            flash('Screenshot uploaded.', 'success')
             return redirect(url_for('show_screenshots'))
         else:
-            flash('Uploads of this filetype not allowed.')
+            flash('Uploads of this filetype not allowed.', 'error')
     return render_template('upload_screenshot.html')
 
 @app.route('/delete/<shot>')
@@ -156,10 +156,10 @@ def upload_screenshot():
 def delete_screenshot(shot):
     filename = os.path.join(config.SCREENSHOTS_DIR, secure_filename(shot))
     if not os.path.exists(filename):
-        flash("Screenshot '{0}' does not exist.".format(filename))
+        flash("Screenshot '{0}' does not exist.".format(filename), 'error')
         return redirect(url_for('show_screenshots'))
     os.remove(filename)
-    flash('Screenshot removed.')
+    flash('Screenshot removed.', 'success')
     return redirect(url_for('show_screenshots'))
 
 @app.route('/users')
@@ -178,7 +178,7 @@ def add_user():
               generate_password_hash(request.form['password']),
               False])
     g.db.commit()
-    flash('User added')
+    flash('User added.', 'success')
     return redirect(url_for('show_users'))
 
 @app.route('/users/delete/<int:id>', methods=['POST', 'GET'])
@@ -187,11 +187,11 @@ def add_user():
 def delete_user(id):
     user = query_db('select * from users where id=?', [id])
     if len(user) <= 0:
-        flash('User does not exist')
+        flash('User does not exist.', 'error')
     else:
         query_db('delete from users where id=?', [id])
         g.db.commit()
-        flash('User deleted')
+        flash('User deleted.', 'success')
     return redirect(url_for('show_users'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -208,7 +208,7 @@ def login():
         else:
             session['user_id'] = user['id']
             session.permanent = True
-            flash('You were logged in.')
+            flash('You were logged in.', 'success')
             if 'next' in request.args:
                 return redirect(request.args['next'])
             else:
@@ -218,7 +218,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
-    flash('You were logged out.')
+    flash('You were logged out.', 'success')
     return redirect(url_for('show_screenshots'))
 
 if __name__ == '__main__':

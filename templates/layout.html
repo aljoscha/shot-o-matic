@@ -22,8 +22,8 @@
     </div>
     {% if get_flashed_messages() %}
     <div class="span-24">
-    {% for message in get_flashed_messages() %}
-        <div class="notice">{{ message }}</div>
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+        <div class="{{ category }}">{{ message }}</div>
         {% endfor %}
     </div>
     {% endif %}
