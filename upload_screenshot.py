@@ -25,4 +25,4 @@ if __name__ == "__main__":
     c.setopt(c.VERBOSE, 0)
     c.perform()
     c.close()
-    print "Done."
+    print "\nDone."
