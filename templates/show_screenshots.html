@@ -4,6 +4,7 @@
     <div class="span-12 {{ loop.cycle('', 'last') }} screenshot">
         <a href="{{ url_for('screenshot', user=user, shot=shot) }}"><img src="{{ url_for('screenshot', user=user, shot=shot) }}"></a>
         <a href="{{ url_for('delete_screenshot', user=user, shot=shot) }}">delete</a>
+        <span style="float: right">by <a href="{{ url_for('show_screenshots', user=user) }}">{{ user }}</a></span>
     </div>
 {{ loop.cycle('', '    <hr class="space">') | safe }}
 {%- else -%}
