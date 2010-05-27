@@ -60,7 +60,7 @@ def _create_user(name, password, admin=False, db=None):
         db = g.db
 
     db.execute('insert into users VALUES(?, ?, ?, NULL)',
-               [name, generate_password_hash(password),True])
+               [name, generate_password_hash(password),admin])
     user = query_db("select * from users where name=?", [name], one=True,
                                                                 db=db)
     screenshots_dir = user['name']
@@ -168,6 +168,7 @@ def login_required(message="You must be logged in to access this section."):
                                     one=True)
                     if user and check_password_hash(user['password'],
                                                     request.form['password']):
+                        g.user = user
                         return f(*args, **kwargs)
                 flash(message, 'notice')
                 return redirect(url_for('login', next=request.url))
@@ -178,8 +179,9 @@ def login_required(message="You must be logged in to access this section."):
 
 ################################################################################
 # Views
+@app.route('/<user>')
 @app.route('/')
-def show_screenshots():
+def show_screenshots(user=None):
     users = glob.glob(os.path.join(config.SCREENSHOTS_DIR, '*'))
     users = [os.path.basename(name) for name in users]
     screenshots = []
