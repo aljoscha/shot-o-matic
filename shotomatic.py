@@ -182,8 +182,11 @@ def login_required(message="You must be logged in to access this section."):
 @app.route('/<user>')
 @app.route('/')
 def show_screenshots(user=None):
-    users = glob.glob(os.path.join(config.SCREENSHOTS_DIR, '*'))
-    users = [os.path.basename(name) for name in users]
+    if user is None:
+        users = glob.glob(os.path.join(config.SCREENSHOTS_DIR, '*'))
+        users = [os.path.basename(name) for name in users]
+    else:
+        users = [user]
     screenshots = []
     for user in users:
         user_shots = glob.glob(os.path.join(config.SCREENSHOTS_DIR, user, '*'))

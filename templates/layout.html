@@ -13,6 +13,7 @@
         <a href="{{ url_for('show_screenshots') }}">shots</a> //
         <a href="{{ url_for('show_screenshots', all=1) }}">shots (all)</a> //
     {% if g.user %}
+        <a href="{{ url_for('show_screenshots', user=g.user['name']) }}">my shots</a> //
         <a href="{{ url_for('upload_screenshot') }}">upload</a> //
         <a href="{{ url_for('show_users') }}">users</a> //
         <a href="{{ url_for('logout') }}">log out ({{ g.user.name }})</a>
