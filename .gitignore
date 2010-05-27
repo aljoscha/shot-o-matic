@@ -3,4 +3,5 @@
 *.db
 env
 screenshots
+sessions
 config.py
