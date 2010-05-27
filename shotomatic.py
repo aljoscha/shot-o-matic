@@ -230,6 +230,9 @@ def delete_screenshot(user, shot):
     user = secure_filename(user)
     shot = secure_filename(shot)
     filename = os.path.join(config.SCREENSHOTS_DIR, user, shot)
+    if not g.user['admin'] and user != g.user['name']:
+        flash("You can only delete your own screenshots.", 'notice')
+        return redirect(url_for('show_screenshots'))
     if not os.path.exists(filename):
         flash("Screenshot '{0}' does not exist.".format(shot), 'error')
         return redirect(url_for('show_screenshots'))
