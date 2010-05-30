@@ -6,3 +6,7 @@ a, h1, h2       { color: #377BA8; }
 .nav {
     font-size: 150%;
 }
+
+.content {
+    overflow: auto;
+}

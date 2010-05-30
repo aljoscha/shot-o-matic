@@ -6,12 +6,13 @@
     <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='screen.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
+    {% block head %}{% endblock %}
 </head>
 <body>
 <div class="container">
     <div class="span-24 append-bottom prepend-top nav">
         <a href="{{ url_for('show_screenshots') }}">shots</a> //
-        <a href="{{ url_for('show_screenshots', all=1) }}">shots (all)</a> //
     {% if g.user %}
         <a href="{{ url_for('show_screenshots', user=g.user['name']) }}">my shots</a> //
         <a href="{{ url_for('upload_screenshot') }}">upload</a> //

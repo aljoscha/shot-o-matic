@@ -1,12 +1,24 @@
 {% extends "layout.html" %}
+{% block head %}
+<script type="text/javascript">
+    $(window).scroll(function() {
+        var scrollHeight = 100;
+        if ($(window).scrollTop() > ($(document).height() - $(window).height() - scrollHeight)) {
+            $.get('{{ url_for('show_screenshots_ajax') }}', '', function(newitems) {
+                $('.content').append(newitems);
+		    });
+        }
+    });
+</script>
+{% endblock %}
 {% block body %}
 {%- for user, shot in screenshots %}
-    <div class="span-12 {{ loop.cycle('', 'last') }} screenshot">
+    <div class="span-24 screenshot">
         <a href="{{ url_for('screenshot', user=user, shot=shot) }}"><img src="{{ url_for('screenshot', user=user, shot=shot) }}"></a>
         <a href="{{ url_for('delete_screenshot', user=user, shot=shot) }}">delete</a>
         <span style="float: right">by <a href="{{ url_for('show_screenshots', user=user) }}">{{ user }}</a></span>
+        <hr class="space">
     </div>
-{{ loop.cycle('', '    <hr class="space">') | safe }}
 {%- else -%}
     <em>Unbelievable.  No screenshots here so far</em>
 {%- endfor %}

@@ -193,10 +193,25 @@ def show_screenshots(user=None):
         for user_shot in user_shots:
             screenshots.append((user, os.path.basename(user_shot)))
     screenshots.sort(reverse=True, cmp=lambda x,y: cmp(x[1], y[1]))
-    show_all = request.args.get('all', 0)
-    if show_all == 0:
-        screenshots = screenshots[:10]
+    screenshots = screenshots[:1]
     return render_template('show_screenshots.html', screenshots=screenshots)
+
+@app.route('/ajax/<user>/screenshots')
+@app.route('/ajax/screenshots')
+def show_screenshots_ajax(user=None):
+    if user is None:
+        users = glob.glob(os.path.join(config.SCREENSHOTS_DIR, '*'))
+        users = [os.path.basename(name) for name in users]
+    else:
+        users = [user]
+    screenshots = []
+    for user in users:
+        user_shots = glob.glob(os.path.join(config.SCREENSHOTS_DIR, user, '*'))
+        for user_shot in user_shots:
+            screenshots.append((user, os.path.basename(user_shot)))
+    screenshots.sort(reverse=True, cmp=lambda x,y: cmp(x[1], y[1]))
+    screenshots = screenshots[:1]
+    return render_template('show_screenshots_ajax.html', screenshots=screenshots)
 
 @app.route('/<user>/shot/<shot>')
 def screenshot(user, shot):
